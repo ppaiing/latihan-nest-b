@@ -1,11 +1,11 @@
-import { BadRequestException, Controller, Get, Param, Post, Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param, Post, Query, Res, Response, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UserDecorator } from 'src/user.decorator';
 import { User } from '@prisma/client';
-import { Response } from 'express';
+import { response } from 'express';
 
 @Controller('profile')
 export class ProfileController {
@@ -15,6 +15,7 @@ export class ProfileController {
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(@UploadedFile() file: Express.Multer.File, @UserDecorator() user: User) {
     if (!file) throw new BadRequestException("File tidak boleh kosong!!");
+    
     return this.profileService.uploadFile(file, user.id);
   }
 
@@ -24,8 +25,10 @@ export class ProfileController {
   }
 
   @Get("/:id")
-  async getProfile(@Param("id") id: string, @Res() res: Response) {
-    const filename = await this.profileService.sendMyFotoProfile(parseInt(id));
-    return res.sendFile(filename, { root: 'uploads' });
+  async getProfile(@Param("id") id: number, @Res()Response) {
+
+    const filename = await this.profileService.sendMyFotoProfile(id);
+
+    return response.sendFile(`../../uploads`+filename);
   }
 }

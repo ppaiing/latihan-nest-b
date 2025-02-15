@@ -19,6 +19,8 @@ model Mahasiswa{
   kelas String
   jurusan String
   jenis_kelamin Jenis_Kelamin
+  foto_profile String?
+  gambar String?
 }
 
 enum Jenis_Kelamin {
