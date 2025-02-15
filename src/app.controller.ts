@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Delete, Param, Put, Res, UseGuards} from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Param, Put, Res, UseGuards, UseInterceptors, UploadedFile} from '@nestjs/common';
 import { AppService } from './app.service';
-import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { CreateMahasiswaDTO} from './dto/create-mahasiswa.dto';
 import { UpdateMahasiswaDTO } from './dto/update-mahasiswa.dto';
 import { RegisterUserDTO } from './dto/register-user.dto';
@@ -9,6 +9,8 @@ import { Response } from 'express';
 import { UserDecorator } from './user.decorator';
 import { AuthGuard } from './auth.guard';
 import { User } from '@prisma/client';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileUploadDto } from './dto/file-upload.dto';
 
 @Controller()
 export class AppController {
@@ -49,6 +51,20 @@ export class AppController {
   @ApiBearerAuth()
   auth(@UserDecorator() user : User) {
   return user
+  }
+  @Post('mahasiswa/:nim/upload-gambar')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: FileUploadDto })
+  uploadMahasiswaGambar(@Param('nim') nim: string, @UploadedFile() file: Express.Multer.File) {
+    return this.appService.uploadMahasiswaGambar (nim, file);
+  }
+
+  @Get('mahasiswa/:nim/gambar')
+  async getMahasiswaGambar(@Param('nim') nim: string, @Res() res : Response) {
+    const name = await this.appService.getMahasiswaFoto(nim);
+    res.sendFile(name, { root: 'uploads' });
+
   }
 
   @Post("Login")

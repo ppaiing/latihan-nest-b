@@ -19,6 +19,8 @@ model Mahasiswa{
   kelas String
   jurusan String
   jenis_kelamin Jenis_Kelamin
+  foto_profile String?
+  gambar String?
 }
 
 enum Jenis_Kelamin {
@@ -31,6 +33,7 @@ model User {
   username String @unique
   password String 
   role Role  @default(USER)
+  foto_profile String? 
 
   created_at DateTime @default(now())
 }
